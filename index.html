@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Historical Gold Price Analysis</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f0f2f5; }
+        .section { margin-bottom: 30px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; margin-top: 10px; }
+        select, table { padding: 10px; width: 200px; }
+    </style>
+</head>
+<body>
+
+<div class="section">
+    <h2>Select Year (2000–2025):</h2>
+    <select id="yearSelect">
+        <option value="">-- Select Year --</option>
+        <script>
+            for (let y = 2000; y <= 2025; y++) {
+                document.write(`<option value="${y}">${y}</option>`);
+            }
+        </script>
+    </select>
+    <br>
+    <button onclick="loadGoldPrices()">Load Gold Price Chart</button>
+</div>
+
+<div class="section" id="chartSection"></div>
+
+<div class="section">
+    <button onclick="loadOrnaments()">View Gold Ornaments</button>
+</div>
+
+<div class="section" id="ornamentSection"></div>
+
+<div class="section">
+    <button onclick="predictFuturePrice()">Predict 2025 Price</button>
+</div>
+
+<div class="section" id="predictionSection"></div>
+
+<script>
+function loadGoldPrices() {
+    const year = document.getElementById('yearSelect').value;
+    if (!year) return alert("Please select a year.");
+    fetch(`/get_gold_prices?year=${year}`)
+        .then(res => res.json())
+        .then(data => {
+            let html = `<h3>Gold Price Chart for ${year}</h3><ul>`;
+            data.forEach(d => {
+                html += `<li>${d.month}: ₹${d.price}</li>`;
+            });
+            html += `</ul>`;
+            document.getElementById('chartSection').innerHTML = html;
+        });
+}
+
+function loadOrnaments() {
+    fetch('/get_ornaments')
+        .then(res => res.json())
+        .then(data => {
+            let html = `<h3>Gold Ornaments</h3><table border="1"><tr><th>Name</th><th>Price</th><th>Grams</th></tr>`;
+            data.forEach(d => {
+                html += `<tr><td>${d.name}</td><td>₹${d.price}</td><td>${d.grams}g</td></tr>`;
+            });
+            html += `</table>`;
+            document.getElementById('ornamentSection').innerHTML = html;
+        });
+}
+
+function predictFuturePrice() {
+    fetch('/predict_price')
+        .then(res => res.json())
+        .then(data => {
+            let html = `<h3>Gold Price Prediction for 2025</h3>
+                        <p>Predicted Price: ₹${data.predicted_price}</p>
+                        <p>${data.explanation}</p>`;
+            document.getElementById('predictionSection').innerHTML = html;
+        });
+}
+</script>
+
+</body>
+</html>
